@@ -30,7 +30,7 @@
             "{ '$match': { 'EstadoSolicitud': ?0 } }",
             "{ '$sort': { 'FechaHora': -1 }}"
         })
-        List<ServicioReservaModel> listarReservaPorEstadoList(String estadosolicitud);
+        List<ServicioReservaModel> listarReservaPorEstadoList(String estadoSolicitud);
 
         // Agregacion para reservas activas de cada proveedor   
         @Aggregation(pipeline = {
