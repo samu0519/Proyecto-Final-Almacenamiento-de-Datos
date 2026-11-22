@@ -21,8 +21,7 @@ public class ServicioReservaModel {
     private ObjectId id;
     private ObjectId idCliente;
     private ObjectId idServicio;
-    private ObjectId idProveedor;
-    private Date FechaHora;
+     private Date FechaHora;
     private String Direccion;
     private String Barrio;
     private String InfoLugar;
@@ -43,10 +42,7 @@ public class ServicioReservaModel {
     public String getIdClienteJson(){
         return idCliente != null ? idCliente.toHexString():null;   
     }
-    @JsonGetter("idProveedor")
-    public String getIdProveedorJson() {
-        return idProveedor != null ? idProveedor.toHexString():null;
-    }
+  
     @JsonGetter ("idServicio")
     public String getIdServicioJson(){
         return idServicio != null ? idServicio.toHexString():null;   

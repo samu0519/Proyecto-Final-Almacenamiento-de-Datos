@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +21,11 @@ import com.ProyectoFInalApiRest.backend.Service.ServicioReservaService;
 public class ServicioReservaController {
     @Autowired ServicioReservaService servicioReservaService;
 
+//Crear Reserva
+    @PostMapping ("/crear/{idProveedor}")
+    public ResponseEntity<ServicioReservaModel> crearReserva(@PathVariable ObjectId idProveedor, @RequestBody ServicioReservaModel newReserva){
+        return new ResponseEntity<>(servicioReservaService.crearReserva(newReserva, idProveedor), HttpStatus.CREATED);
+    }
 // Bucar por id
     @GetMapping ("/{id}")
     public ResponseEntity<ServicioReservaModel> buscarReservaPorId(@PathVariable ObjectId id) {

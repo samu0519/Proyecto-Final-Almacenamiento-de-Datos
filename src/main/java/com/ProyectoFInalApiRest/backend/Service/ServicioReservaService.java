@@ -6,7 +6,7 @@ import com.ProyectoFInalApiRest.backend.Model.ServicioReserva.ServicioReservaMod
 
 
 public interface ServicioReservaService {
-    public ServicioReservaModel crearReserva(ServicioReservaModel reserva);
+    public ServicioReservaModel crearReserva(ServicioReservaModel newReserva, ObjectId idProveedor);
     public List<ServicioReservaModel> listarReservaPorClienteList(ObjectId idCliente);
     public List<ServicioReservaModel> listarReservaPorProveedorList(ObjectId idProveedor);
     public List<ServicioReservaModel> listarReservaPorEstadoList(String estadoSolicitud);
