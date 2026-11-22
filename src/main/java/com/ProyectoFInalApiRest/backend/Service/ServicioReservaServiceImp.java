@@ -1,12 +1,19 @@
 package com.ProyectoFInalApiRest.backend.Service;
 
+
+import java.util.Date;
 import java.util.List;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import com.ProyectoFInalApiRest.backend.Repository.ServicioRepository;
+import com.ProyectoFInalApiRest.backend.Model.Servicio.ServicioModel;
+
+import com.ProyectoFInalApiRest.backend.Model.ServicioReserva.ServicioCopia;
 import com.ProyectoFInalApiRest.backend.Model.ServicioReserva.ServicioReservaModel;
+
 import com.ProyectoFInalApiRest.backend.Repository.ServicioReservaRepository;
 
 // logica de las reservas el controller llama todos estos metodos
@@ -15,7 +22,53 @@ public class ServicioReservaServiceImp implements ServicioReservaService {
 
     // spring nos pasa el repository ya conectado, no hay que crearlo
     @Autowired ServicioReservaRepository servicioReservaRepository;
+    @Autowired ServicioRepository servicioRepository;
 
+@Override
+public ServicioReservaModel crearReserva(ServicioReservaModel reserva) {
+    if (reserva == null) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La reserva es requerida.");
+    }
+    ObjectId clienteId = reserva.getIdCliente();
+    if (clienteId == null) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El cliente es requerido.");
+    }
+    ObjectId proveedorId = reserva.getIdProveedor();
+    if (proveedorId == null) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El proveedor es requerido.");
+    }
+    ObjectId servicioId = reserva.getIdServicio();
+    if (servicioId == null) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El servicio es requerido.");
+    }
+    if (reserva.getFechaHora() == null) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La fecha y hora son requeridas.");
+    }
+    ServicioModel servicio = servicioRepository.findById(servicioId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "El servicio no existe."));
+
+    //verificamos que el servicio pertenezca al proveedor
+    if (!servicio.getIdProveedor().equals(proveedorId)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El servicio no pertenece al proveedor.");
+    }
+
+    // se crean las copias de los servicios
+    ServicioCopia copia = new ServicioCopia();
+    copia.setNombreServicioCopia(servicio.getNombre());
+    copia.setPrecioServicioCopia(servicio.getPrecio());
+    copia.setDuracionServicioCopia(servicio.getDuracionServicio());
+    reserva.setServicioCopia(copia);
+
+    // se le asigna el estado inicial de la reserva
+    reserva.setEstadoSolicitud("Pendiente");
+    // se le asigina la fecha
+    Date ahora = new Date();
+
+    reserva.setFechaCreacionSolicitud(ahora);
+    reserva.setFechaActualizacionSolicitud(ahora);
+
+    return servicioReservaRepository.save(reserva);
+}
     // Busqueda por Id
     @Override
     public ServicioReservaModel buscarReservaPorId(ObjectId id) { // usamos el metodo findById que ya tiene el repository para buscar por id, y si no encuentra nada devuelve error
@@ -90,4 +143,5 @@ public class ServicioReservaServiceImp implements ServicioReservaService {
         reservaActual.setFechaActualizacionSolicitud(new java.util.Date());
         return servicioReservaRepository.save(reservaActual);
     }
+   
 }

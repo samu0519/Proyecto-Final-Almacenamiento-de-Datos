@@ -6,11 +6,12 @@ import com.ProyectoFInalApiRest.backend.Model.ServicioReserva.ServicioReservaMod
 
 
 public interface ServicioReservaService {
+    public ServicioReservaModel crearReserva(ServicioReservaModel reserva);
     public List<ServicioReservaModel> listarReservaPorClienteList(ObjectId idCliente);
     public List<ServicioReservaModel> listarReservaPorProveedorList(ObjectId idProveedor);
     public List<ServicioReservaModel> listarReservaPorEstadoList(String estadoSolicitud);
     public ServicioReservaModel buscarReservaPorId(ObjectId id); // No hay ningun metodo buscar en el repository dado que el extends mongorepository ya tiene un metodo findById que hace lo mismo, pero lo hacemos aqui para que sea mas facil de usar en el controller
     public void eliminarReserva(ObjectId id);
     public ServicioReservaModel cambiarEstadoReserva(ObjectId id, ServicioReservaModel reservaNueva);
-
+   
 }
