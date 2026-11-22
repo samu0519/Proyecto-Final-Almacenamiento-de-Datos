@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.ProyectoFInalApiRest.backend.Model.ServicioReserva.ServicioReservaModel;
@@ -44,5 +46,10 @@ public class ServicioReservaController {
     public ResponseEntity<String> eliminarReserva(@PathVariable("idR") ObjectId idReserva) {
         servicioReservaService.eliminarReserva(idReserva);
         return new ResponseEntity<String>("Reserva eliminada", HttpStatus.OK);
+    }
+// Cambiar estado de la reserva
+    @PutMapping("/{id}/estado")
+    public ResponseEntity<ServicioReservaModel> cambiarEstadoReserva(@PathVariable ObjectId id, @RequestBody ServicioReservaModel reservaNueva) {
+        return new ResponseEntity<>(servicioReservaService.cambiarEstadoReserva(id, reservaNueva), HttpStatus.OK);
     }
 }   
