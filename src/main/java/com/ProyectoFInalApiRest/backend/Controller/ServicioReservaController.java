@@ -1,5 +1,6 @@
 package com.ProyectoFInalApiRest.backend.Controller;
 
+import java.util.List;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -8,7 +9,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.ProyectoFInalApiRest.backend.Model.ServicioReserva.ServicioReservaModel;
 import com.ProyectoFInalApiRest.backend.Service.ServicioReservaService;
  
@@ -22,4 +22,20 @@ public class ServicioReservaController {
     public ResponseEntity<ServicioReservaModel> buscarReservaPorId(@PathVariable ObjectId id) {
         return new ResponseEntity<ServicioReservaModel>(servicioReservaService.buscarReservaPorId(id), HttpStatus.OK);
     }
-}
+
+// Listar resorvas por cliente
+    @GetMapping ("/cliente/{idCliente}")
+    public ResponseEntity<List<ServicioReservaModel>> listarReservaPorClienteList(@PathVariable ObjectId idCliente) {
+        return new ResponseEntity<>(servicioReservaService.listarReservaPorClienteList(idCliente), HttpStatus.OK);
+    }
+// Listar reservas por proveedor
+    @GetMapping ("/proveedor/{idProveedor}")
+    public ResponseEntity<List<ServicioReservaModel>> listarReservaPorProveedorList(@PathVariable ObjectId idProveedor) {
+        return new ResponseEntity<>(servicioReservaService.listarReservaPorProveedorList(idProveedor), HttpStatus.OK);
+    }
+// Listar reservas por estado Activo
+    @GetMapping ("/estado/{estadoSolicitud}")
+    public ResponseEntity<List<ServicioReservaModel>> listarReservaPorEstadoList(@PathVariable String estadoSolicitud) {
+        return new ResponseEntity<>(servicioReservaService.listarReservaPorEstadoList(estadoSolicitud), HttpStatus.OK);
+    }
+}   
