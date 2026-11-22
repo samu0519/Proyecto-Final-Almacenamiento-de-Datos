@@ -5,6 +5,8 @@ import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,8 +33,18 @@ public class ServicioReservaModel {
     private Date FechaCreacionSolicitud;   
     private Date FechaActualizacionSolicitud;
     private Date FechaSugeridaSolicitud;
-     
-    
-
+    //Creamis el metodo que me permite mostrar id del usuario como un hexadecimal
+    @JsonGetter ("id")
+    public String getIdjson(){
+        return id != null ? id.toHexString():null;   
+    }
+    @JsonGetter ("idCliente")
+    public String getIdClienteJson(){
+        return idCliente != null ? idCliente.toHexString():null;   
+    }
+    @JsonGetter ("idServicio")
+    public String getIdServicioJson(){
+        return idServicio != null ? idServicio.toHexString():null;   
+    }
 }
 
