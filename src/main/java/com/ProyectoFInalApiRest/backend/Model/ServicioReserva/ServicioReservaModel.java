@@ -31,7 +31,8 @@ public class ServicioReservaModel {
     private Date FechaCreacionSolicitud;   
     private Date FechaActualizacionSolicitud;
     private Date FechaSugeridaSolicitud;
-
+     
+    
 
 }
 
