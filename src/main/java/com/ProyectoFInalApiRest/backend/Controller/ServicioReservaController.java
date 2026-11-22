@@ -5,6 +5,7 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,5 +38,11 @@ public class ServicioReservaController {
     @GetMapping ("/estado/{estadoSolicitud}")
     public ResponseEntity<List<ServicioReservaModel>> listarReservaPorEstadoList(@PathVariable String estadoSolicitud) {
         return new ResponseEntity<>(servicioReservaService.listarReservaPorEstadoList(estadoSolicitud), HttpStatus.OK);
+    }
+// Eliminar reserva
+    @DeleteMapping("/eliminar/{idR}")
+    public ResponseEntity<String> eliminarReserva(@PathVariable("idR") ObjectId idReserva) {
+        servicioReservaService.eliminarReserva(idReserva);
+        return new ResponseEntity<String>("Reserva eliminada", HttpStatus.OK);
     }
 }   
