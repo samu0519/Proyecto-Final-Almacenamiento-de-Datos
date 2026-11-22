@@ -4,6 +4,7 @@ import java.util.List;
 import org.bson.types.ObjectId;
 import com.ProyectoFInalApiRest.backend.Model.ServicioReserva.ServicioReservaModel;
 
+
 public interface ServicioReservaService {
     public List<ServicioReservaModel> listarReservaPorClienteList(ObjectId idCliente);
     public List<ServicioReservaModel> listarReservaPorProveedorList(ObjectId idProveedor);

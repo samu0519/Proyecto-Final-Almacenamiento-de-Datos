@@ -37,6 +37,7 @@
             "{'$lookup': {'from': 'Servicio', 'localField': 'idServicio', 'foreignField': '_id', 'as': 'servicio'}}",
             "{'$unwind': {'path': '$servicio'}}",
             "{'$match': {'servicio.idProveedor': ?0, 'EstadoSolicitud': {'$in': ['Pendiente', 'Sugerida', 'Aceptada']}}}", // con el $in filtramos solo las reservas que estan en Pendiente, Sugerida o Aceptada, que son las que ocupan horario en este caso
+            "{'$project': {'servicio': 0}}",
             "{'$sort': {'FechaHora': 1}}"
         })
         List<ServicioReservaModel> listarReservasActivasPorProveedorList(ObjectId idProveedor);
