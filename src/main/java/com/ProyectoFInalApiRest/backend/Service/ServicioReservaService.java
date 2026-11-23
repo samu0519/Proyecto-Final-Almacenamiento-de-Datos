@@ -4,7 +4,9 @@ import java.util.List;
 import org.bson.types.ObjectId;
 import com.ProyectoFInalApiRest.backend.Model.ServicioReserva.ServicioReservaModel;
 
-
+// En el ServicioReservaService ponemos la lista de lo que se puede hacer con las reservas
+// Aqui solo van los nombres de los metodos sin el codigo 
+// El controller llama es el qe llama a estos metodoso
 public interface ServicioReservaService {
     public ServicioReservaModel crearReserva(ServicioReservaModel newReserva, ObjectId idProveedor);
     public List<ServicioReservaModel> listarReservaPorClienteList(ObjectId idCliente);
