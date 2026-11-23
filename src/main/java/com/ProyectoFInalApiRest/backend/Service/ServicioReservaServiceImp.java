@@ -1,7 +1,7 @@
 package com.ProyectoFInalApiRest.backend.Service;
 
-
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Date;
@@ -17,6 +17,8 @@ import com.ProyectoFInalApiRest.backend.Model.ServicioReserva.ServicioCopia;
 import com.ProyectoFInalApiRest.backend.Model.ServicioReserva.ServicioReservaModel;
 import com.ProyectoFInalApiRest.backend.Model.Usuario.UsuarioModel;
 import com.ProyectoFInalApiRest.backend.Repository.ServicioReservaRepository;
+import com.ProyectoFInalApiRest.backend.Model.Usuario.HorarioDisponible;       
+import com.ProyectoFInalApiRest.backend.Model.Usuario.HorarioNoDisponible;
 import com.ProyectoFInalApiRest.backend.Repository.UsuarioRepository;
 
 // logica de las reservas el controller llama todos estos metodos
@@ -167,6 +169,7 @@ public ServicioReservaModel crearReserva(ServicioReservaModel newReserva, Object
             validarSinCruce(idProveedor, fechaAceptar, duracion, id);
             // aqui va la disponibilidad (regla 4)
 
+            validarDisponibilidad(idProveedor, fechaAceptar, duracion);
             // si el cliente acepto la propuesta, la reserva queda en esa fecha
             reservaActual.setFechaHora(fechaAceptar);
         }
@@ -196,7 +199,62 @@ public ServicioReservaModel crearReserva(ServicioReservaModel newReserva, Object
                 }
             }
         }
+            
     }
+
+    //Validar disponibilidad del proveedor
+    public void validarDisponibilidad(ObjectId idProveedor, Date fecha, int duracion) {
+
+        UsuarioModel proveedor = usuarioRepository.findById(idProveedor)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Error! Proveedor no encontrado"));
+
+        // utc igual que en cruces, asi la hora queda como esta en mongo
+        LocalDateTime inicio = LocalDateTime.ofInstant(fecha.toInstant(), ZoneId.of("UTC"));
+        LocalDateTime fin = inicio.plusMinutes(duracion);
+
+        // el dia en ingles lo pasamos a como esta en mongo (sin tilde)
+        String dia = switch (inicio.getDayOfWeek()) {
+            case MONDAY -> "Lunes";
+            case TUESDAY -> "Martes";
+            case WEDNESDAY -> "Miercoles";
+            case THURSDAY -> "Jueves";
+            case FRIDAY -> "Viernes";
+            case SATURDAY -> "Sabado";
+            case SUNDAY -> "Domingo";
+        };
+
+        boolean disponible = false;
+
+        // se revisa si algun horario de ese dia cubre toda la reserva
+        if (proveedor.getProveedor().getHorarioDisponible() != null) {
+            for (HorarioDisponible horario : proveedor.getProveedor().getHorarioDisponible()) {
+                LocalTime horaInicio = LocalTime.parse(horario.getHoraInicio());
+                LocalTime horaFin = LocalTime.parse(horario.getHoraFin());
+                if (horario.getDiasSemana().equals(dia) &&
+                    !inicio.toLocalTime().isBefore(horaInicio) &&
+                    !fin.toLocalTime().isAfter(horaFin)) {
+                    disponible = true;
+                }
+            }
+        }
+
+        if (!disponible) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error! El proveedor no trabaja en ese horario");
+        }
+
+        // si no tiene periodos bloqueados no hay nada que revisar
+        if (proveedor.getProveedor().getHorarioNoDisponible() != null) {
+            for (HorarioNoDisponible horario : proveedor.getProveedor().getHorarioNoDisponible()) {
+                LocalDateTime bloqueoInicio = LocalDateTime.ofInstant(horario.getFechaInicio().toInstant(), ZoneId.of("UTC"));
+                LocalDateTime bloqueoFin = LocalDateTime.ofInstant(horario.getFechaFin().toInstant(), ZoneId.of("UTC"));
+
+                if (inicio.isBefore(bloqueoFin) && fin.isAfter(bloqueoInicio)) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error! El proveedor no esta disponible en ese periodo");
+                }
+            }
+        }
+    }
+
     // da la fecha y hora actual de cali, guardada igual que las demas (la hora local tal cual)
     public Date horaLocal() {
         LocalDateTime ahora = LocalDateTime.now(ZoneId.of("America/Bogota"));   // mira el reloj de cali
