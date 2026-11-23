@@ -1,6 +1,8 @@
 package com.ProyectoFInalApiRest.backend.Service;
 
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import org.bson.types.ObjectId;
@@ -56,7 +58,9 @@ public ServicioReservaModel crearReserva(ServicioReservaModel newReserva, Object
     if (!servicio.getIdProveedor().equals(idProveedor)) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El servicio no pertenece al proveedor.");
     }
-    
+    // Se llama el metodo para la validacion de curces de horario
+    validarSinCruce(idProveedor, newReserva.getFechaHora(), servicio.getDuracionServicio(), null);
+
     // se crean las copias de los servicios
     ServicioCopia copia = new ServicioCopia();
     copia.setNombreServicioCopia(servicio.getNombre());
@@ -149,5 +153,27 @@ public ServicioReservaModel crearReserva(ServicioReservaModel newReserva, Object
         reservaActual.setFechaActualizacionSolicitud(new java.util.Date());
         return servicioReservaRepository.save(reservaActual);
     }
-   
+
+    //Validar que no hayan cruces de horario
+    public  void validarSinCruce(ObjectId idProveedor, Date fechaHora, int duracion, ObjectId idIgnorar) {
+        // pasamos la fecha a hora de local y le sumamos la duracion para saber a que hora termina
+        LocalDateTime inicioNueva = LocalDateTime.ofInstant(fechaHora.toInstant(), ZoneId.of("America/Bogota"));
+        LocalDateTime finNueva = inicioNueva.plusMinutes(duracion);
+
+        List<ServicioReservaModel> reservasActivas = servicioReservaRepository.listarReservasActivasPorProveedorList(idProveedor);
+
+        for (ServicioReservaModel reserva : reservasActivas) {
+            // solo revisamos las que no son la misma reserva
+            if (!reserva.getId().equals(idIgnorar)) {
+                LocalDateTime inicioActiva = LocalDateTime.ofInstant(reserva.getFechaHora().toInstant(), ZoneId.of("America/Bogota"));
+                LocalDateTime finActiva = inicioActiva.plusMinutes(reserva.getServicioCopia().getDuracionServicioCopia());
+
+                // se cruzan si la nueva empieza antes de que termine la activa y la activa empieza antes de que termine la nueva
+                if (inicioNueva.isBefore(finActiva) && inicioActiva.isBefore(finNueva)) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error! El horario se cruza con otra reserva del proveedor");
+                }
+            }
+        }
+    }
 }
+    
