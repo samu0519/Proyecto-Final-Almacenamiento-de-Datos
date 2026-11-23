@@ -120,6 +120,10 @@ public ServicioReservaModel crearReserva(ServicioReservaModel newReserva, Object
         ServicioReservaModel reservaActual = buscarReservaPorId(id);
         String  estadoActual = reservaActual.getEstadoSolicitud();
         String estadoActualizado = reservaNueva.getEstadoSolicitud();
+        
+        if (estadoActualizado == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error! Falta el estado nuevo");
+        }
 
         List<String> estadosValidos = switch (estadoActual) {
             case "Pendiente" -> List.of("Aceptada", "Rechazada", "Sugerida");
@@ -130,7 +134,13 @@ public ServicioReservaModel crearReserva(ServicioReservaModel newReserva, Object
         if (!estadosValidos.contains(estadoActualizado)){ // Si permitidos no tienea estadoActualizado dara error
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error! Estado actual no valido");
         }
+        ServicioModel servicio = servicioRepository.findById(reservaActual.getIdServicio())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "El servicio no existe."));
+            
+        ObjectId idProveedor = servicio.getIdProveedor();
 
+        // la duracion es la guardada en la reserva (la copia), no la del catalogo
+        int duracion = reservaActual.getServicioCopia().getDuracionServicioCopia();
         // Si se pasa a un estado de cancelacion o rechazo se debe dar el motivo
         if (estadoActualizado.equals("Rechazada") || estadoActualizado.equals("Cancelada") ){
             if(reservaNueva.getMotivoRechazoCancelacion() == null || reservaNueva.getMotivoRechazoCancelacion().isEmpty()){
@@ -145,9 +155,21 @@ public ServicioReservaModel crearReserva(ServicioReservaModel newReserva, Object
             if(reservaNueva.getFechaSugeridaSolicitud() == null){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error! Falta la fecha menor");
             }
+            validarSinCruce(idProveedor, reservaNueva.getFechaSugeridaSolicitud(), duracion, id);
             reservaActual.setFechaSugeridaSolicitud(reservaNueva.getFechaSugeridaSolicitud());
         }
+        if (estadoActualizado.equals("Aceptada")) {
+            // si viene de pendiente se acepta la fecha original, si viene de sugerida la que propuso el proveedor
+            Date fechaAceptar = reservaActual.getFechaHora();
+            if (estadoActual.equals("Sugerida")) {
+                fechaAceptar = reservaActual.getFechaSugeridaSolicitud();
+            }
+            validarSinCruce(idProveedor, fechaAceptar, duracion, id);
+            // aqui va la disponibilidad (regla 4)
 
+            // si el cliente acepto la propuesta, la reserva queda en esa fecha
+            reservaActual.setFechaHora(fechaAceptar);
+        }
  
         reservaActual.setEstadoSolicitud(estadoActualizado);
         reservaActual.setFechaActualizacionSolicitud(horaLocal());
