@@ -5,6 +5,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonGetter;
 
 import lombok.AllArgsConstructor;
@@ -21,7 +22,9 @@ public class ServicioReservaModel {
     private ObjectId id;
     private ObjectId idCliente;
     private ObjectId idServicio;
-     private Date FechaHora;
+    // con esto la fecha se escribe y se muestra como "2026-11-30 10:00" en hora de cali
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "UTC")
+    private Date FechaHora;
     private String Direccion;
     private String Barrio;
     private String InfoLugar;
@@ -32,6 +35,7 @@ public class ServicioReservaModel {
     private String MotivoRechazoCancelacion;
     private Date FechaCreacionSolicitud;   
     private Date FechaActualizacionSolicitud;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "UTC")
     private Date FechaSugeridaSolicitud;
     //Creamis el metodo que me permite mostrar id del usuario como un hexadecimal
     @JsonGetter ("id")

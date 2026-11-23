@@ -3,6 +3,7 @@ package com.ProyectoFInalApiRest.backend.Service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
 import org.bson.types.ObjectId;
@@ -72,7 +73,7 @@ public ServicioReservaModel crearReserva(ServicioReservaModel newReserva, Object
     newReserva.setEstadoSolicitud("Pendiente");
 
     // se le asigina la fecha
-    Date ahora = new Date();
+    Date ahora = horaLocal();
     newReserva.setFechaCreacionSolicitud(ahora);
     newReserva.setFechaActualizacionSolicitud(ahora);
     newReserva.setId(null);
@@ -147,17 +148,16 @@ public ServicioReservaModel crearReserva(ServicioReservaModel newReserva, Object
             reservaActual.setFechaSugeridaSolicitud(reservaNueva.getFechaSugeridaSolicitud());
         }
 
-        //  hace falta revisar cruces y disponibilidad
-
+ 
         reservaActual.setEstadoSolicitud(estadoActualizado);
-        reservaActual.setFechaActualizacionSolicitud(new java.util.Date());
+        reservaActual.setFechaActualizacionSolicitud(horaLocal());
         return servicioReservaRepository.save(reservaActual);
     }
 
     //Validar que no hayan cruces de horario
     public  void validarSinCruce(ObjectId idProveedor, Date fechaHora, int duracion, ObjectId idIgnorar) {
         // pasamos la fecha a hora de local y le sumamos la duracion para saber a que hora termina
-        LocalDateTime inicioNueva = LocalDateTime.ofInstant(fechaHora.toInstant(), ZoneId.of("America/Bogota"));
+        LocalDateTime inicioNueva = LocalDateTime.ofInstant(fechaHora.toInstant(), ZoneId.of("UTC"));
         LocalDateTime finNueva = inicioNueva.plusMinutes(duracion);
 
         List<ServicioReservaModel> reservasActivas = servicioReservaRepository.listarReservasActivasPorProveedorList(idProveedor);
@@ -165,7 +165,7 @@ public ServicioReservaModel crearReserva(ServicioReservaModel newReserva, Object
         for (ServicioReservaModel reserva : reservasActivas) {
             // solo revisamos las que no son la misma reserva
             if (!reserva.getId().equals(idIgnorar)) {
-                LocalDateTime inicioActiva = LocalDateTime.ofInstant(reserva.getFechaHora().toInstant(), ZoneId.of("America/Bogota"));
+                LocalDateTime inicioActiva = LocalDateTime.ofInstant(reserva.getFechaHora().toInstant(), ZoneId.of("UTC"));
                 LocalDateTime finActiva = inicioActiva.plusMinutes(reserva.getServicioCopia().getDuracionServicioCopia());
 
                 // se cruzan si la nueva empieza antes de que termine la activa y la activa empieza antes de que termine la nueva
@@ -174,6 +174,11 @@ public ServicioReservaModel crearReserva(ServicioReservaModel newReserva, Object
                 }
             }
         }
+    }
+    // da la fecha y hora actual de cali, guardada igual que las demas (la hora local tal cual)
+    public Date horaLocal() {
+        LocalDateTime ahora = LocalDateTime.now(ZoneId.of("America/Bogota"));   // mira el reloj de cali
+        return Date.from(ahora.toInstant(ZoneOffset.UTC));                     // la guarda sin sumarle horas
     }
 }
     
