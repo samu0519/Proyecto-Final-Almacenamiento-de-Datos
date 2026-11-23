@@ -16,7 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ProyectoFInalApiRest.backend.Model.ServicioReserva.ServicioReservaModel;
 import com.ProyectoFInalApiRest.backend.Service.ServicioReservaService;
  
-@RestController
+
+// En el ServicioReservaController estan las rutas que se llaman desde postman
+// Recibe la peticion con lo que llega en el url y en el body y se lo pasa al service
+ 
+@RestController// Le dice a spring que esta clase recibe peticiones y devuelve las respuestas en json
 @RequestMapping ("/Proyecto/reservas")
 public class ServicioReservaController {
     @Autowired ServicioReservaService servicioReservaService;
