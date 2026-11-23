@@ -6,6 +6,10 @@
     import org.springframework.data.mongodb.repository.MongoRepository;
     import com.ProyectoFInalApiRest.backend.Model.ServicioReserva.ServicioReservaModel;
 
+// En el ServicioReservaRepository es el que va a mongoDB a buscar y guardar las reservas de la coleccion ServicioReserva
+// Con MongoRepository<ServicioReservaModel, ObjectId> le decimos que use el molde de la reserva y que el id es un ObjectId
+// MongoRepository ya nos trae hechos findById, save y deleteById, aqui solo ponemos las agregaciones que no vienen incluidas
+
     public interface ServicioReservaRepository extends MongoRepository<ServicioReservaModel, ObjectId>{
     
         // Hacemos la agregacion de listar id de reserva por cliente

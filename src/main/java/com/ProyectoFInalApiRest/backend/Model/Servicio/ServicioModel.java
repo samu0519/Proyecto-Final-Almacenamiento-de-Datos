@@ -20,7 +20,7 @@ public class ServicioModel {
     
     @Id
     private ObjectId id;
-    private ObjectId idProveedor; // Se guardan los datos completos y no solo el id del servicio, para que si el proveedor cambia el nombre, precio o duracion en su catalogo la reserva no cambie
+    private ObjectId idProveedor; 
     private String Nombre;
     private String Categoria;
     private String Descripcion;
